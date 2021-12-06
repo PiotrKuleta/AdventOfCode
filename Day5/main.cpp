@@ -1,0 +1,257 @@
+#include <set>
+#include <string>
+#include <vector>
+#include <fstream>
+#include <sstream> 
+#include <iostream>
+#include <algorithm>
+
+struct vent_line {
+public:
+	vent_line() : x1(0),x2(0),y1(0),y2() {};
+	~vent_line() {};
+
+	void insert_vent(int num, int val) {
+		if (num == 1) { x1 = val; }
+		else if (num == 2) { y1 = val; }
+		else if (num == 3) { x2 = val; }
+		else if (num == 4) { y2 = val; }
+	};
+
+public:
+	int x1, x2, y1, y2;
+
+};
+
+int main() {
+
+	std::fstream new_file;
+	new_file.open("input", std::ios::in);
+	
+	std::vector<vent_line*> all_vents;
+
+	if (new_file.is_open()) {
+
+		std::string line;
+
+		while (std::getline(new_file, line)) {
+
+			std::string sfind = " -> ";
+			std::string sReplace = ",";
+			line.replace(line.find(sfind), sfind.size(), sReplace);
+			//std::cout << line << std::endl;
+
+			std::istringstream iss(line);
+			std::string token;
+
+			vent_line* vent= new vent_line();
+			
+			int counter = 1;
+			while (std::getline(iss, token, ',')) {
+				vent->insert_vent(counter++, std::stoi(token));
+			}
+
+			all_vents.push_back(vent);
+
+		}
+
+	}
+
+
+	int max_x = 0;
+	int max_y = 0;
+	for (auto& vent : all_vents) {
+		max_x = vent->x1 > max_x ? vent->x1 : max_x;
+		max_x = vent->x2 > max_x ? vent->x2 : max_x;
+
+		max_y = vent->y1 > max_y ? vent->y1 : max_y;
+		max_y = vent->y2 > max_y ? vent->y2 : max_y;
+	}
+
+	std::vector<std::vector<int>>diagram;
+	for (int i = 0; i <= max_x; i++) { 
+		std::vector<int> vec( max_y + 1, 0 ); 
+		diagram.push_back(vec);
+	}
+
+	//auto x = diagram.size();
+
+	for (auto& vent : all_vents) {
+		if (vent->x1 == vent->x2) {
+			
+			int lower, grater;
+			if (vent->y1 < vent->y2) {
+				lower = vent->y1;
+				grater = vent->y2;
+			} else {
+				grater  = vent->y1;
+				lower = vent->y2;
+			}
+
+			for (int i = lower; i <= grater; i++) {
+				diagram[i][vent->x1] += 1;
+			}
+			
+			
+
+		} else if (vent->y1 == vent->y2) {
+
+			int lower, grater;
+			if (vent->x1 < vent->x2) {
+				lower = vent->x1;
+				grater = vent->x2;
+			}
+			else {
+				grater = vent->x1;
+				lower = vent->x2;
+			}
+
+			for (int i = lower; i <= grater; i++) {
+				diagram[vent->y1][i] += 1;
+			}
+
+		}
+
+	}
+
+	int count_2_more = 0;
+	for (auto& diagram_line : diagram) {
+		
+		for (int i = 0; i < diagram_line.size(); i++) {
+			//std::cout << diagram_line[i] << " " ;
+			diagram_line[i] >= 2 ? count_2_more++ : 0 ;
+		}
+		//std::cout << std::endl;
+	}
+
+	std::cout << "Part1 answer: " << count_2_more <<std::endl;
+
+	int counter = 0;
+
+	for (auto& vent : all_vents) {
+		if (vent->x1 == vent->y1 && vent->x2 == vent->y2) {
+			
+			int lower, grater;
+			if (vent->x1 < vent->x2) {
+				lower = vent->x1;
+				grater = vent->x2;
+			}
+			else {
+				grater = vent->x1;
+				lower = vent->x2;
+			}
+			
+			for (int i = lower; i <= grater; i++) {
+				diagram[i][i] += 1;
+			}
+		
+		}
+		else if (vent->x1 == vent->y2 && vent->x2 == vent->y1) {
+			
+			int lower, grater;
+			if (vent->x1 < vent->y1) {
+				lower = vent->x1;
+				grater = vent->y1;
+			}
+			else {
+				grater = vent->x1;
+				lower = vent->y1;
+			}
+
+			int y_ = grater;
+			for (int i = lower; i <= grater; i++) {
+				diagram[i][y_--] += 1;
+			}
+		
+		}
+		else if (std::abs(vent->x1 - vent->x2) == std::abs(vent->y1 - vent->y2)) { // tu jest blad ne bezwzgledna !!
+			
+			bool check_case = true;;
+			int lower, grater, check_;
+			if (vent->x1 - vent->x2 > 0) {
+
+
+
+				
+				if (vent->y1 > vent->y2 > 0) {
+					lower = vent->y2;
+					grater = vent->y1;
+
+					check_ = vent->x2;
+					//6, 4 -> 2, 0
+					//4,6     0,2
+					"+";
+				} else {
+
+					lower = vent->y1;
+					grater = vent->y2;
+
+					check_ = vent->x1;
+
+					check_ = vent->y2;
+					// 8,2 -> 5,5 | 6,4
+
+					// 2,8 | 5,5 -> 4,6
+
+					"-";
+					check_case = false;
+				}		
+			} else {
+				
+				if (vent->y1 < vent->y2 > 0) {
+					lower = vent->y1;
+					grater = vent->y2;
+
+					check_ = vent->x1;
+					//2,0 -> 6,4
+					//0,2 -> 4,6
+					"+";
+				} else {
+					lower = vent->y2;
+					grater = vent->y1;
+					check_ = vent->x2;
+					// 6,4 | 5,5 -> 8,2
+					// 4,6          2,8
+					check_case = false;
+					"-";
+				}
+			}
+
+
+			for (int i = lower; i <= grater; i++) {
+
+				int y = check_case == true ? check_++  : check_-- ;
+
+				diagram[i][y] += 1;
+			}
+		}
+
+
+		//std::cout << " Loop:  " << counter << std::endl;
+		for (auto& diagram_line : diagram) {
+
+			for (int i = 0; i < diagram_line.size(); i++) {
+				//std::cout << diagram_line[i] << " ";
+			}
+			//std::cout << std::endl;
+		}
+
+		counter++;
+
+	}
+
+	//std::cout << std::endl;
+	int count_2_more_2 = 0;
+	for (auto& diagram_line : diagram) {
+
+		for (int i = 0; i < diagram_line.size(); i++) {
+			//std::cout << diagram_line[i] << " " ;
+			diagram_line[i] >= 2 ? count_2_more_2++ : 0;
+		}
+		//std::cout << std::endl;
+	}
+
+	std::cout << "Part2 answer: " << count_2_more_2 << std::endl;
+
+	return 0;
+}
