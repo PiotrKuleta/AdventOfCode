@@ -15,7 +15,7 @@ void read_data(std::vector<std::vector<int>>& input)
 			std::vector<int> transformed_line;
 			std::istringstream iss(line);
 			for (auto& sign : line) {
-				transformed_line.push_back(sign - 48);
+				transformed_line.push_back(sign - '0');
 			}
 			input.push_back(transformed_line);
 		}
