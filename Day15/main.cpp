@@ -103,7 +103,7 @@ void extend_row(std::vector<int> vec, std::vector<int>& input_elem ) {
     }
 }
 
-void inrease_row(std::vector<std::vector<int>>& vec, std::vector<int> input_elem, int i) {
+void increase_row(std::vector<std::vector<int>>& vec, std::vector<int> input_elem, int i) {
     std::transform(std::begin(input_elem), std::end(input_elem), std::begin(input_elem), [&](int x) {
         int modulo = (x + i) % 9;
         x = modulo == 0 ? 9 : modulo;
@@ -121,7 +121,7 @@ std::vector<std::vector<int>> extendInput(std::vector<std::vector<int>> input_co
     std::vector<std::vector<int>> vec = input_copy;
     for (int i = 1; i < 5; i++) {
         for (auto& input_elem : vec) {
-            inrease_row(input_copy, input_elem, i);
+            increase_row(input_copy, input_elem, i);
         }
     }
     return input_copy;
